@@ -1,0 +1,95 @@
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="#">∫mx</a>
+    </div>
+    <form class="navbar-form navbar-left" role="search">
+        <div class="form-group">
+            <label for="host" class="sr-only">host</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="host" placeholder="host:port" ng-model="host">
+                <div class="input-group-btn">
+                    <button type="submit" class="btn" ng-class="{'btn-success': !mbeans.length > 0, 'btn-danger': mbeans.length > 0}" ng-click="getMBeans()" ng-disabled="loading">{{loading | iif : "loading .." : "load"}}</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <form class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+            <label for="templateName" class="sr-only">template name</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="templateName" placeholder="template name" ng-model="templateName" ng-disabled="!mbeans.length > 0"/>
+                <div class="input-group-btn">
+                    <button class="btn btn-primary" ng-click="createTemplate()" ng-disabled="!mbeans.length > 0 || !templateName">export</button>
+                    <button type="button" class="btn btn-primary" ng-click="downloadTemplate()" ng-show="fileSaverSupported" ng-disabled="!mbeans.length > 0 || !templateName">
+                        <span class="glyphicon glyphicon-floppy-save"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</nav>
+
+<div class="panel panel-default" ng-show="template != undefined">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-link" ng-click="downloadTemplate()" ng-show="fileSaverSupported">
+            <span class="glyphicon glyphicon-floppy-save"></span>
+        </button>
+        {{templateName}}
+        <button type="button" class="close" aria-hidden="true" ng-click="clearTemplate()">&times;</button>
+    </div>
+    <div class="panel-body">
+        <textarea class="form-control" rows="10">{{template}}</textarea>
+    </div>
+    <div class="panel-body pull-right">
+    </div>
+</div>
+
+<div class="col-md-12" ng-show="mbeans.length > 0">
+    <table class="table table-condensed">
+        <thead>
+            <tr>
+                <th>
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label for="mbeanFilter" class="sr-only">mbeans</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control input-sm" id="mbeanFilter" placeholder="mbean filter" ng-model="mbeanFilter" ng-disabled="!mbeans.length > 0"/>
+                                <div class="input-group-btn">
+                                    <button class="btn btn-default btn-sm" ng-class="{active: mBeanFilterIgnoreCase}" ng-disabled="!mbeans.length > 0" ng-click="toggleMBeanFilterCase()">ignore case</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </th>
+                <th>
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label for="attributeFilter" class="sr-only">attributes</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="attributeFilter" placeholder="attribute filter" ng-model="attributeFilter" ng-disabled="!mbeans.length > 0"/>
+                                <div class="input-group-btn">
+                                    <button class="btn btn-default" ng-class="{active: attributeFilterIgnoreCase}" ng-disabled="!mbeans.length > 0" ng-click="toggleAttributeFilterCase()">ignore case</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </th>
+                <th>
+                    <span class="glyphicon glyphicon-export"></span>
+                    ∆
+                </th>
+            </tr>
+        </thead>
+        <tbody ng-repeat="mbean in mbeans" ng-show="match(mbeanFilter, mbean.id, mBeanFilterIgnoreCase)">
+        <tr ng-repeat="attribute in mbean.attributes" ng-class="{active: attribute.export}" ng-show="match(attributeFilter, attribute.id, attributeFilterIgnoreCase)">
+            <td class="col-md-9">{{mbean.id}}</td>
+            <td class="col-md-2" ng-click="toggleAttribute(attribute)">{{attribute.id}}</td>
+            <td class="col-md-1">
+                <input type="checkbox" ng-model="attribute.export"/>
+                <input type="checkbox" ng-model="attribute.delta" ng-disabled="!attribute.export"/>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
