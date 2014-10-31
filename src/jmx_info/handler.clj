@@ -1,4 +1,5 @@
 (ns jmx-info.handler
+  (:import (clojure.lang PersistentArrayMap))
   (:use [compojure.core]
         [ring.middleware.params :only [wrap-params]])
   (:require [compojure.handler :as handler]
@@ -7,27 +8,18 @@
             [clojure.java.jmx :as jmx]
             [clojure.core.memoize :as memo]))
 
-
-;; original, working
-;(defn expand-mbean [mbean]
-;  {:id (str mbean),
-;   :attributes (map (fn [a] {:id (name a)}) (jmx/attribute-names mbean))})
-
 (defn get-parts [attr-name attr-value]
   (do
-    ;(println "name: " (str attr-name) " value: " (str attr-value))
     (let [res {:id attr-name}]
       (if
-        (= (type attr-value) clojure.lang.PersistentArrayMap)
+        (= (type attr-value) PersistentArrayMap)
         (merge res {:parts (keys attr-value)})
         res))))
 
 (defn expand-mbean [mbean-name]
   (let [mbean (jmx/mbean mbean-name)
-        mbean-keys (map name (keys mbean))
         attributes (for [[attr-name attr-value] mbean] (get-parts attr-name attr-value))]
     (do
-      ;(println "mbean: " (str mbean-name) " keys: " mbean-keys " everything: " mbean)
       {:id (str mbean-name),
        :attributes attributes})))
 
@@ -36,14 +28,6 @@
 
 (defn split-attributes [attributes]
   (map list (map name (keys attributes))))
-
-;(defn expand-mbean [mbean]
-;  {:id (str mbean),
-;   :attributes (map (fn [a] {:id (name a)}) (jmx/mbean mbean))})
-
-;(defn expand-mbean [mbean]
-;  {:id (str mbean),
-;   :attributes (split-attributes (jmx/mbean mbean))})
 
 (defn wrap-dir-index [handler]
   (fn [req]
@@ -68,13 +52,10 @@
   (GET "/mbeans/:host/:port" [host port]
        (get-mbeans-cached {:host host, :port port}))
   (POST "/mbeans/:host/:port" [host port username password :as params]
-       (println host port username password)
        (get-mbeans-cached {:host host, :port port, :environment (create-jmx-env username password)}))
   (route/resources "/")
   (route/not-found "Not Found"))
 
-;(def app
-;  (handler/site app-routes))
 (def app (-> (handler/site app-routes)
              (wrap-dir-index)
              (wrap-params)))
