@@ -1,5 +1,6 @@
 (ns jmx-info.handler
-  (:use compojure.core)
+  (:use [compojure.core]
+        [ring.middleware.params :only [wrap-params]])
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
             [clojure.data.json :as json]
@@ -59,13 +60,21 @@
 (def get-mbeans-cached
   (memo/ttl get-mbeans :ttl/threshold (* 10 60 1000)))
 
+(defn create-jmx-env [username password]
+  (when (and username password)
+    {"jmx.remote.credentials" (into-array String [username password])}))
+
 (defroutes app-routes
   (GET "/mbeans/:host/:port" [host port]
        (get-mbeans-cached {:host host, :port port}))
+  (POST "/mbeans/:host/:port" [host port username password :as params]
+       (println host port username password)
+       (get-mbeans-cached {:host host, :port port, :environment (create-jmx-env username password)}))
   (route/resources "/")
   (route/not-found "Not Found"))
 
 ;(def app
 ;  (handler/site app-routes))
 (def app (-> (handler/site app-routes)
-             (wrap-dir-index)))
+             (wrap-dir-index)
+             (wrap-params)))

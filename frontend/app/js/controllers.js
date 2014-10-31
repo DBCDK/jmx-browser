@@ -35,7 +35,7 @@ controller('MBeanCtrl', ['$scope', 'MBeans', function($scope, MBeans) {
         var port = hostParts[1];
         console.log("Fetching mbeans from " + address + ":" + port);
         $scope.loading = true;
-        $scope.mbeans = MBeans.get({host: address, port: port}, function() {
+        $scope.mbeans = MBeans.get({host: address, port: port, username: $scope.username, password: $scope.password}, function() {
             $scope.loading = false;
             console.log(JSON.stringify($scope.mbeans, null, 2));
         });

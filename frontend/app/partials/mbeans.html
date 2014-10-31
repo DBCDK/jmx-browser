@@ -2,15 +2,19 @@
     <div class="navbar-header">
         <a class="navbar-brand" href="#">∫mx</a>
     </div>
-    <form class="navbar-form navbar-left" role="search">
+    <form class="navbar-form navbar-left form-inline" role="search">
         <div class="form-group">
             <label for="host" class="sr-only">host</label>
-            <div class="input-group">
-                <input type="text" class="form-control" id="host" placeholder="host:port" ng-model="host">
-                <div class="input-group-btn">
-                    <button type="submit" class="btn" ng-class="{'btn-success': !mbeans.length > 0, 'btn-danger': mbeans.length > 0}" ng-click="getMBeans()" ng-disabled="loading">{{loading | iif : "loading .." : "load"}}</button>
-                </div>
-            </div>
+            <input type="text" class="form-control" id="host" placeholder="host:port" ng-model="host">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" id="username" placeholder="username" ng-model="username">
+        </div>
+        <div class="form-group">
+            <input type="password" class="form-control" id="password" placeholder="password" ng-model="password">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn" ng-class="{'btn-success': !mbeans.length > 0, 'btn-danger': mbeans.length > 0}" ng-click="getMBeans()" ng-disabled="loading">{{loading | iif : "loading .." : "load"}}</button>
         </div>
     </form>
     <form class="navbar-form navbar-left" role="search">
